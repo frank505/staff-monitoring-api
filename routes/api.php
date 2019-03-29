@@ -45,4 +45,6 @@ Route::group(['prefix' => 'admin',
    Route::post("/update-task/{id}","AdminTaskController@updateTask");
    //fines
    Route::get("/monthly-balance/{id}","FinancialDisciplineController@loadFinanceForTheMonth");
+   Route::get("/get-year/{id}","FinancialDisciplineController@loadYearAvailableForUser");
+   Route::post("/full-financial-report","FinancialDisciplineController@GetUserFinancialReport");
 });

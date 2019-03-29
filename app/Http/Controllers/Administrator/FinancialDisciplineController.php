@@ -58,5 +58,59 @@ class FinancialDisciplineController extends Controller
       ],200);
 
     }
+//this function loads the avaialble years
+    public function loadYearAvailableForUser(Request $request,$id)
+    {
+        $user =  $this->user->find($id);
+        if(!$user){
+           return response()->json([
+               'success' => false,
+               'message' => 'Sorry, this staff doesnt exist in the database '
+           ], 400);
+        }
+        return   $this->financial_discipline->where(["user_id"=>$id])->distinct()->get(["year","name"]);
 
+    }
+//this function gets the user financial report
+    public function GetUserFinancialReport(Request $request)
+    {
+        $validator = Validator::make($request->all(),
+        [
+        'month'=>'required|string',
+        'year'=> 'required|string',
+        'id'=>'required|integer'
+        ]
+    );
+
+    if($validator->fails()){
+        return response()->json([
+         "success"=>false,
+         "message"=>$validator->messages()->toArray(),
+        ],400);    
+      }
+       
+     // return $request->all();
+  $array_data = array();
+   $GetData = $this->financial_discipline->
+   where(["user_id"=>$request->id,"month"=>$request->month,"year"=>$request->year])->distinct()->get(["task_id"]);
+   foreach ($GetData as $key => $value) {
+      $task_id = $value->task_id;
+      $getTaskId = $this->financial_discipline->where(["task_id"=>$task_id])->get();
+      foreach ($getTaskId as $key => $contents) {
+          # code...
+       $content[$value->task_id] = $getTaskId; 
+         
+      }
+   }
+
+   
+
+   return response()->json([
+    "success"=>true,
+    "message"=>$content,
+   ],200);
+
+    }
+
+ //end of this class  
 }

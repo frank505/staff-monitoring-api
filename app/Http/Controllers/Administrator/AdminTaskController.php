@@ -113,6 +113,12 @@ public function loadSingleTask($id)
 {
  // $get_task = $this->where(["id"=>$id])->get();
    $task= $this->task->find($id);
+   if(!$task){
+    return response()->json([
+      "success"=>true,
+      "message"=>"this task seems not to exist anymore it may have been deleted oops!",
+     ],400);
+   }
 //$task = SingleTaskGeterCollection::collection($get_task);
       return response()->json([
        "success"=>true,
