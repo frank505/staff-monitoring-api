@@ -244,6 +244,23 @@ class AuthAdminController extends Controller
 
    
      
+    public function saveOrUpdatePushToken(Request $request)
+    {
+        $validator = Validator::make($request->only('token', 'pushToken'), 
+        ['token' => 'required',
+        'pushToken'=> 'required'
+        ]);
+        if($validator->fails()){
+            return response()->json([
+             "success"=>false,
+             "message"=>$validator->messages()->toArray(),
+            ],400);    
+          }
+          $admin = auth("admins")->authenticate($request->token);
+          $admin->push_token = $request->pushToken;
+          $admin->save();
+    }
+    
     
 
         

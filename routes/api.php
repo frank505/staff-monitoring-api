@@ -27,6 +27,7 @@ Route::group(['prefix' => 'admin',
     Route::post("/profile","AuthAdminController@getAuthadmin");
     Route::post("/change-password","AuthAdminController@changePassword");
     Route::get("/all-admins/{pagination}","AuthAdminController@viewAdmins");
+    Route::post("/save-push-token","AuthAdminController@saveOrUpdatePushToken");
     //users section
     Route::post("/register-staff","AdminManagesStaffController@register");
     Route::get("/all-users/{pagination}","AdminManagesStaffController@LoadUsers");
@@ -48,3 +49,20 @@ Route::group(['prefix' => 'admin',
    Route::get("/get-year/{id}","FinancialDisciplineController@loadYearAvailableForUser");
    Route::post("/full-financial-report","FinancialDisciplineController@GetUserFinancialReport");
 });
+
+
+Route::group(['prefix' => 'staffs',
+'namespace'=>'Staff',
+'middleware' => ['CORS']],function ()
+{
+    //sleep(5);
+    Route::post('/login', 'AuthStaffController@login');
+     //this might be useful though an admin registering another admin
+    //this is to display all the available roles
+    Route::post("/logout","AuthAdminController@logout");
+    //display admin profile
+    Route::post("/reset-password-link","AuthStaffController@sendResetPasswordLink");
+    
+});
+
+Route::post("/send/admin-push-notifications","SendPushNotificationsController@AdminGetUserLoginPush")->middleware("CorsPush");
