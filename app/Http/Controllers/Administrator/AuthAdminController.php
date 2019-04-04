@@ -259,9 +259,13 @@ class AuthAdminController extends Controller
           $admin = auth("admins")->authenticate($request->token);
           $admin->push_token = $request->pushToken;
           $admin->save();
+          return response()->json([
+            "success"=>true,
+            "message"=>"token saved successfully",
+           ],200);
     }
     
-    
+
 
         
         public function returnResponseWithToken($token)

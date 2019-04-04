@@ -57,7 +57,8 @@ class SendPushNotificationsController extends Controller
                    "icon"=> $this->base_url."/push_images"."/logo_css.png", 
                    ),
                    "data"=>array(
-                       "id"=>$id
+                       "id"=>$id,
+                       "staff_name"=>$staff_name
                    ),
                    "to"=>$getPushToken, 
                    "priority"=>"high",

@@ -105,6 +105,7 @@ public function updateNotificationsTable($staff_id,$staff_name)
        $day = date("l");
        $Month =  date("F");
        $year = date("Y");
+       $day_of_month = date("j");
        $admin_recieve_push = 0; 
      $this->staff_login_detail->create([
          "staff_id"=>$staff_id,
@@ -113,6 +114,7 @@ public function updateNotificationsTable($staff_id,$staff_name)
          "day"=>$day,
          "month"=>$Month,
          "year"=>$year,
+         "date"=>$day_of_month,
          "admin_recieve_push"=>$admin_recieve_push
      ]);
 }

@@ -8,7 +8,7 @@ class StaffLoginNotificationsDetail extends Model
 {
     //
 protected $table = "staff_login_detail";
-protected $fillable = ["staff_id","staff_name","time","day","month","year","admin_recieve_push"];
+protected $fillable = ["staff_id","staff_name","date","time","day","month","year","admin_recieve_push"];
 
     
 }

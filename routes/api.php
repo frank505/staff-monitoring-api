@@ -48,6 +48,7 @@ Route::group(['prefix' => 'admin',
    Route::get("/monthly-balance/{id}","FinancialDisciplineController@loadFinanceForTheMonth");
    Route::get("/get-year/{id}","FinancialDisciplineController@loadYearAvailableForUser");
    Route::post("/full-financial-report","FinancialDisciplineController@GetUserFinancialReport");
+   Route::get("/get-daily-login-details","StaffLoginDetailsController@StaffLoginDetails");
 });
 
 
