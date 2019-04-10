@@ -36,7 +36,10 @@ public static function perform_http_request($method, $url, $data = false)
     // Optional Authentication:
     //curl_setopt($curl, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
     //curl_setopt($curl, CURLOPT_USERPWD, "username:password");
-
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+        'content-type: application/json',
+        'Authorization: key=AAAA1GdJKDE:APA91bH2z3HqSLKfNbw3Jm4dxOFADgT9G1DFTuyNtZ5zWLozcd7z6m9VXFliKmGTP62vVSoh-VtxJlEcIfi7Ho1HHHSrVVLGsTvRqueZCjmYG40b67YS6HF6ljHbf152j67BVHpV0UPI'
+    ));
     curl_setopt($curl, CURLOPT_URL, $url);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
 

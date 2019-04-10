@@ -71,8 +71,8 @@ if($validator->fails()){
        $staffIdToUse->last_Login = Carbon::now(); 
        $staffIdToUse->save();
     $this->updateNotificationsTable($staff_id,$staff_name);
-    $this->push->AdminGetUserLoginPush(); //send push notification to admin that user just logged in
-    $this->NotificationSentIndicator();
+   // $this->push->AdminGetUserLoginPush(); //send push notification to admin that user just logged in
+   // $this->NotificationSentIndicator();
        return response()->json([
         'success' => true,
         'token' => $jwt_token,
@@ -85,9 +85,9 @@ if($validator->fails()){
     $staffIdToUse->last_Login = Carbon::now(); 
     $staffIdToUse->save();
 
- $this->updateNotificationsTable($staff_id,$staff_name);
- $this->push->AdminGetUserLoginPush(); //send push notification to admin that user just logged in
- $this->NotificationSentIndicator();
+ $this->updateNotificationsTable($staff_id,$staff_name);///
+ // $this->push->AdminGetUserLoginPush(); //send push notification to admin that user just logged in
+ //$this->NotificationSentIndicator();
 
 return response()->json([
     'success' => true,

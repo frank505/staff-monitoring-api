@@ -49,6 +49,15 @@ Route::group(['prefix' => 'admin',
    Route::get("/get-year/{id}","FinancialDisciplineController@loadYearAvailableForUser");
    Route::post("/full-financial-report","FinancialDisciplineController@GetUserFinancialReport");
    Route::get("/get-daily-login-details","StaffLoginDetailsController@StaffLoginDetails");
+   Route::post("/show-full-login-details","StaffLoginDetailsController@ShowFullLoginDetails");
+   Route::post("/deduct-money-for-attendance","StaffLoginDetailsController@deductMoneyFromStaff");
+   Route::post("/update_deducted-money","StaffLoginDetailsController@UpdateStaffSalaryDeduct");
+   Route::get("/get-search-daily-login-details/{search}","StaffLoginDetailsController@GetUserSearchLoginReport");
+   Route::post("/delete-deducted-money-for-attendance","StaffLoginDetailsController@DeleteFinancialPunishement");
+   Route::post("/deduct-salary-by-default","StaffLoginDetailsController@DeductSalaryByDefault");
+   Route::post("/deduct-salary-by-custom","StaffLoginDetailsController@DeductSalaryCustom");
+   Route::post("/update-deduct-salary-by-custom","StaffloginDetailsController@UpdateDeductSalaryCustom");
+   Route::post("/update-deduct-salary-by-default","StaffloginDetailsController@UpdateDeductSalaryDefault");
 });
 
 

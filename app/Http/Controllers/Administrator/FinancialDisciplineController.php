@@ -74,6 +74,7 @@ class FinancialDisciplineController extends Controller
 //this function gets the user financial report
     public function GetUserFinancialReport(Request $request)
     {
+        $content = array();
         $validator = Validator::make($request->all(),
         [
         'month'=>'required|string',

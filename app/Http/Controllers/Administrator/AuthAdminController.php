@@ -186,7 +186,8 @@ class AuthAdminController extends Controller
        //set token expiration time in minutes
        $token_time_frame = auth("admins")->factory()->setTTL(43200);
       
-
+       
+    
     return response()->json([
         'success' => true,
         'token' => $jwt_token,
@@ -243,13 +244,16 @@ class AuthAdminController extends Controller
     }
 
    
-     
+    
     public function saveOrUpdatePushToken(Request $request)
     {
         $validator = Validator::make($request->only('token', 'push_token'), 
         ['token' => 'required',
         'push_token'=> 'required'
         ]);
+
+        //return $request->all();
+
         if($validator->fails()){
             return response()->json([
              "success"=>false,

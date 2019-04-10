@@ -36,18 +36,13 @@ class SendPushNotificationsController extends Controller
     {
         $method = "POST";
          $url = "https://fcm.googleapis.com/fcm/send";
-        $administrators = $this->getAdmin();
-         
-        foreach ($administrators as $key => $admin) {
-           $getPushToken = $admin->push_token;
-           if($getPushToken==NULL){
-
-           }else{
-              
+        $administrators = $this->getAdmin();                   
             $getDetails = $this->staff_login_details::where(["admin_recieve_push"=>0])->OrderBy("id","DESC")->get();
             foreach ($getDetails as $key => $value) {
                $id = $value->id;
                $staff_name = $value->staff_name;
+
+         
                $data = array(
                    "notification"=>array(
                    "title"=>"$staff_name Login Time",
@@ -60,19 +55,15 @@ class SendPushNotificationsController extends Controller
                        "id"=>$id,
                        "staff_name"=>$staff_name
                    ),
-                   "to"=>$getPushToken, 
+                   "to"=>"/topics/all", 
                    "priority"=>"high",
                    "restricted_package_name"=>""
              );
              $data = json_encode($data);  
-             $this->curl_helper::perform_http_request($method, $url, $data);
-         
+             CurlHelperController::perform_http_request($method, $url, $data);
             }
 
-
-           }
-        }
-
+           
    
    
    
