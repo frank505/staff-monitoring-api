@@ -14,6 +14,7 @@ use App\Http\Resources\SingleTaskGeterCollection;
 use Carbon\Carbon;
 use App\User;
 use App\FinancialDiscipline;
+use App\TaskNotifications;
 class AdminTaskController extends Controller
 {
     //
@@ -24,15 +25,16 @@ class AdminTaskController extends Controller
     {
         $this->middleware("auth:admins");
         $this->base_url = $url->to("/");  //this is to make the baseurl available in this controller
-        $this->task = new tasks();
-        $this->user = new User();
+        $this->task = new tasks;
+        $this->user = new User;
         $this->financial_discipline = new FinancialDiscipline;
-        
+        $this->task_notifications = new TaskNotifications;
     }
 
 
     public function CreateTask(Request $request)
     {
+       $getId = "";
         $validator = Validator::make($request->all(),
         [
         'header'=>'required|string',
@@ -60,23 +62,53 @@ class AdminTaskController extends Controller
           $task_attached_file->move($task_dir, $file_name); //more like the move_uploaded_file in php except that more modifications
       }
 
-    $this->task::create([
+    $task_created = $this->task::create([
         "task_header" =>$request->header,
         "users_assigned"=>$request->selected_users,
         "task_content"=>$request->task,
         "attached_file"=>$file_name
 
     ]);
+   if($task_created)
+   {
+    $getLastTask = $this->task->take(1)->where(["attached_file"=>$file_name])->orderBy("id","DESC")->get();
+    foreach ($getLastTask as $key => $value) {
+      # code...
+      $getId = $value->id;
+    }
+
+   
+    $selected_users_loop = json_decode($request->selected_users);
+    foreach ($selected_users_loop as $key => $value) {
+      $selected_users_name = $value->name;
+      $selected_users_id = $value->id;
+      $this->insertTaskNotification($selected_users_id,$selected_users_name,$request->header,$getId);
+      # code...
+    } 
+   }
+    
 
     return response()->json([
         'success' => true,
-        'message' => "new task created successfully"
+        'message' => "new task created successfully",
+        "id"=>$getId
     ], 200);
   //    var_dump($task_attached_file);
   //    return;
      
     }
 
+
+public function insertTaskNotification($user_id,$user_name,$task_header,$task_id)
+{
+  $this->task_notifications::create([
+  "task_id"=>$task_id,
+  "task_header"=>$task_header,
+  "staff_id"=>$user_id,
+  "staff_name"=>$user_name,
+  "viewed"=>0
+ ]);
+}
 
 //this is to load paginated task
 public function loadPaginatedTasks(Request $request,$pagination)
@@ -109,6 +141,7 @@ public function SearchTask($searchval,$pagination)
 }
 
 
+
 public function loadSingleTask($id)
 {
  // $get_task = $this->where(["id"=>$id])->get();
@@ -126,6 +159,9 @@ public function loadSingleTask($id)
        "file_directory"=>$this->base_url."/attached_tasks"."/",
       ],200);
 }
+
+
+
 
 //    /admin/dissaprove-task/
 public function dissaproveTask(Request $request){
@@ -148,8 +184,10 @@ public function dissaproveTask(Request $request){
     ], 400);
 }
 
+
 $checkTaskDissaproved = $this->task->where(["approval_status"=>1,"id"=>$request->id])->count();
 if($checkTaskDissaproved==1){
+
   return response()->json([
     'success' => false,
     'message' => 'this task has already been disapproved a task cannot be disapprove twice'
@@ -200,7 +238,11 @@ if($check_task_data==0){
  // return "on the ".date("j")." this is your balance".$currentBalance;
 
   }
-
+  $getTask = $this->task->find($request->id);
+  $TaskHeader = $getTask->task_header;
+  $taskHeaderMessage = "(dissaproved task) $TaskHeader";
+  $this->insertTaskNotification($user_id,$user_name,$taskHeaderMessage,$id);
+  
   return response()->json([
     'success' => true,
     'message' => 'this task has been dissapproved and staffs salary have been deducted as you requested',
@@ -264,6 +306,12 @@ if($check_task_data==0){
    }
   
   }
+
+  $getTask = $this->task->find($request->id);
+  $TaskHeader = $getTask->task_header;
+  $taskHeaderMessage = "(aproved task) $TaskHeader";
+  $this->insertTaskNotification($user_id,$user_name,$taskHeaderMessage,$id);
+
 
   return response()->json([
     'success' => true,
@@ -437,7 +485,7 @@ if($task_attached_file==NULL){
     $task_attached_file->move($task_dir, $file_name); //more like the move_uploaded_file in php except that more modifications
 }
 
-$this->task::where(["id"=>$id])->update([
+$update_task = $this->task::where(["id"=>$id])->update([
   "task_header" =>$request->header,
   "task_content"=>$request->task,
   "attached_file"=>$file_name
@@ -445,10 +493,31 @@ $this->task::where(["id"=>$id])->update([
 ]);
 
 
-return response()->json([
-  'success' => true,
-  'message' => "this task has been updated successfully"
-], 200);
+if($update_task)
+   {
+    $getLastTask = $this->task->take(1)->where(["attached_file"=>$file_name])->orderBy("id","DESC")->get();
+    foreach ($getLastTask as $key => $value) {
+      # code...
+      $getId = $value->id;
+    }
+
+   
+    $selected_users_loop = json_decode($task->users_assigned);
+    foreach ($selected_users_loop as $key => $value) {
+      $selected_users_name = $value->name;
+      $selected_users_id = $value->id;
+      $this->insertTaskNotification($selected_users_id,$selected_users_name,$request->header,$getId);
+      # code...
+    } 
+   }
+    
+
+    return response()->json([
+        'success' => true,
+        'message' => "new task created successfully",
+        "id"=>$getId
+    ], 200);
+
 
 }
 

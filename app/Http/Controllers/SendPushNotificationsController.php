@@ -60,7 +60,7 @@ class SendPushNotificationsController extends Controller
                    "restricted_package_name"=>""
              );
              $data = json_encode($data);  
-             CurlHelperController::perform_http_request($method, $url, $data);
+             CurlHttpHelperController::perform_http_request($method, $url, $data);
             }
 
            

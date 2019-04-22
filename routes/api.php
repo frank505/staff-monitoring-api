@@ -42,8 +42,9 @@ Route::group(['prefix' => 'admin',
    Route::post("/approve-task","AdminTaskController@approveTask");
    Route::post("/lay-complaints","AdminTaskController@layComplaints");
    Route::post("/update-complaints","AdminTaskController@UpdateComplaints");
-   Route::Post("/delete-task","AdminTaskController@deleteTask");
+   Route::post("/delete-task","AdminTaskController@deleteTask");
    Route::post("/update-task/{id}","AdminTaskController@updateTask");
+
    //fines
    Route::get("/monthly-balance/{id}","FinancialDisciplineController@loadFinanceForTheMonth");
    Route::get("/get-year/{id}","FinancialDisciplineController@loadYearAvailableForUser");
@@ -69,10 +70,22 @@ Route::group(['prefix' => 'staffs',
     Route::post('/login', 'AuthStaffController@login');
      //this might be useful though an admin registering another admin
     //this is to display all the available roles
-    Route::post("/logout","AuthAdminController@logout");
+    Route::post("/profilephoto/add/{token}","AuthStaffController@AddProfilePicture");
+    Route::post("/logout","AuthStaffController@logout");
+    Route::post("/change-password","AuthStaffController@resetPassword");
     //display admin profile
     Route::post("/reset-password-link","AuthStaffController@sendResetPasswordLink");
-    
+    Route::get("/profile/{token}","AuthStaffController@getAuthStaff");
+    Route::get('/load-tasks/{token}', 'TaskController@LoadTasks');    
+    Route::get("/load-full-task/{token}/{id}","TaskController@FullTaskDetails");
+    Route::get("/load-search-data/{token}/{date}","TaskController@LoadSearchData");
+    Route::get("/monthly-balance/{token}","FinancialReportController@MonthlyReport");
+    Route::get("/available-years/{token}","FinancialReportController@loadYearAvailableForUser");
+    Route::get("/monthly-search-response/{token}/{month}/{year}","FinancialReportController@GetUserFinancialReport");
+    Route::get("/notifications/{token}","NotificationsController@returnStaffNotifications");
+    Route::get("/notifications-data/{token}/{pagination}","NotificationsController@loadPaginatedNotificationsData");
+    Route::post("/notifications-viewed","NotificationsController@dismissAllNotifications");
+    Route::post("/task-notifications-viewed","NotificationsController@dismissTaskNotifications");
 });
 
 Route::post("/send/admin-push-notifications","SendPushNotificationsController@AdminGetUserLoginPush")->middleware("CorsPush");

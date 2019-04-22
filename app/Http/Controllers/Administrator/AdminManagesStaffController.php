@@ -64,7 +64,7 @@ class AdminManagesStaffController extends Controller
  
         return response()->json([
             'success' => true,
-            "message"=>"new users registration successful"
+            "message"=>"new staff registration successful"
         ], 200);
     }
 

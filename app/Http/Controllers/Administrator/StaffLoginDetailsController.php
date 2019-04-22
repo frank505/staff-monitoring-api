@@ -49,6 +49,9 @@ class StaffLoginDetailsController extends Controller
   }
 
 
+
+
+
   public function getNotLoggedInUsers()
   {
     $Month =  date("F");
@@ -84,6 +87,9 @@ class StaffLoginDetailsController extends Controller
   }
 
 
+
+
+
   public function StaffLoginDetails()
   {
         $day = date("l");
@@ -99,6 +105,10 @@ class StaffLoginDetailsController extends Controller
         "data"=>$data
        ],200);  
   }
+
+
+
+
 
 
   public function GetUserSearchLoginReport(Request $request,$search)
@@ -136,6 +146,9 @@ class StaffLoginDetailsController extends Controller
   }
 
 
+
+
+
   public function loggedInSearchedStaffs($search)
   {
     $data_search = strtotime($search);
@@ -157,6 +170,13 @@ class StaffLoginDetailsController extends Controller
 
    return $data;
   }
+
+
+
+
+
+
+
 
 
   public function absentSearchStaffsForTheDay($search)
@@ -194,6 +214,19 @@ class StaffLoginDetailsController extends Controller
 
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
   public function ShowFullLoginDetails(Request $request)
   {
     $validator = Validator::make($request->only('id','date','month','year','day'), 
@@ -217,6 +250,20 @@ return response()->json([
      'data'=>$getDetails
 ],200);
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 public function DeleteFinancialPunishement(Request $request)
 {
@@ -282,6 +329,16 @@ $delete = $this->financial_discipline::where(
 
 }
 
+
+
+
+
+
+
+
+
+
+
 public function deductMoneyFromStaff(Request $request)
 {
     $loginpunishement = "attendance";
@@ -343,6 +400,9 @@ if($validator->fails()){
         "admin_complaints"=>$request->complaints,
         "staff_punishement_type"=>$loginpunishement
       ]);
+      $task_header = "(attendance punished) on the $request->date/$request->month/$request->year and salary has been deducted";
+      $this->insertTaskNotification($request->id,$request->name,$task_header,0);
+      
 
       return response()->json([
         "success"=>true,
@@ -350,6 +410,29 @@ if($validator->fails()){
        ],200);    
 
   }
+
+
+
+
+
+
+  
+  public function insertTaskNotification($user_id,$user_name,$task_header,$task_id)
+{
+  $this->task_notifications::create([
+  "task_id"=>$task_id,
+  "task_header"=>$task_header,
+  "staff_id"=>$user_id,
+  "staff_name"=>$user_name,
+  "viewed"=>0
+ ]);
+}
+
+
+
+
+
+
 
 //update content
   public function UpdateStaffSalaryDeduct(Request $request)
@@ -405,13 +488,21 @@ if($validator->fails()){
         "admin_complaints"=>$request->complaints,
         "staff_punishement_type"=>$loginpunishement
       ]);
-
+      $task_header = "(attendance punishement updated) on the $request->date/$request->month/$request->year and salary has been deducted";
+      $this->insertTaskNotification($request->id,$request->name,$task_header,0);
       return response()->json([
         "success"=>true,
         "message"=>"staff salary dedudction successfully updated successfully"
        ],200);    
-
+          
   }
+
+
+
+
+
+
+
 
   //deducting staff salary by default for those who didnt come to work
   public function DeductSalaryByDefault(Request $request)
@@ -482,12 +573,21 @@ if($validator->fails()){
         "staff_punishement_type"=>$loginpunishement
       ]);
 
+      $task_header = "(attendance punished) on the $request->date/$request->month/$request->year and salary has been deducted";
+      $this->insertTaskNotification($request->id,$request->name,$task_header,0);
+    
+
       return response()->json([
         "success"=>true,
         "message"=>"staff salary successfully withdrawns"
        ],200);    
 
   }
+
+
+
+
+
 
 
   public function DeductSalaryCustom(Request $request)
@@ -567,6 +667,9 @@ if($count !== 0)
     "staff_punishement_type"=>$loginpunishement
   ]);
 
+  $task_header = "(attendance punished) on the $request->date/$request->month/$request->year and salary has been deducted";
+  $this->insertTaskNotification($request->id,$request->name,$task_header,0);
+
   return response()->json([
     "success"=>true,
     "message"=>"staff salary successfully withdrawns"
@@ -611,9 +714,7 @@ $staff_salary = $staff_content->earning;
 // "task_id","user_id","name","salary","fine","remaining_balance","day_of_the_month","day",
 // "month","year","staff_punishement_type","admin_complaints"
 $remaining_balance = $staff_salary - $request->amount;
-
-
-  //we insert  
+//we insert  
   $this->financial_discipline::where(
     [
       "task_id"=>0,
@@ -641,12 +742,17 @@ $remaining_balance = $staff_salary - $request->amount;
     "staff_punishement_type"=>$loginpunishement
   ]);
 
+  $task_header = "(attendance punishement updated) on the $request->date/$request->month/$request->year and salary has been deducted";
+  $this->insertTaskNotification($request->id,$request->name,$task_header,0);
+
   return response()->json([
     "success"=>true,
     "message"=>"staff salary withdrawal successfully updated"
    ],200);    
 
   }
+
+
 
 
 
@@ -711,11 +817,17 @@ if($validator->fails()){
         "staff_punishement_type"=>$loginpunishement
       ]);
 
+      $task_header = "(attendance punishement updated) on the $request->date/$request->month/$request->year and salary has been deducted";
+  $this->insertTaskNotification($request->id,$request->name,$task_header,0);
+
       return response()->json([
         "success"=>true,
         "message"=>"staff salary withdrawal successfully updated"
        ],200);    
 }
+
+
+
 
 
 }
