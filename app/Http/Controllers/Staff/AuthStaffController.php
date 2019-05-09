@@ -246,11 +246,16 @@ $user = auth("staffs")->authenticate($request->token);
    }
 }
 
+
+
+
+
 public function AddProfilePicture(Request $request,$token)
 {
+
 $validator = Validator::make($request->only('profilephoto'),
         [
-        'profilephoto.*' => 'required|image|mimes:jpeg,bmp,png|max:8000'
+        'profilephoto' => 'required'
                 ]
     );
 
@@ -261,38 +266,28 @@ $validator = Validator::make($request->only('profilephoto'),
         ],400);    
       }
 
-      
-          $staffs = auth("staffs")->authenticate($token);
-
-
-            $profilephoto = $request->file("profilephoto");
-            if($profilephoto==NULL){
-                return response()->json([
-                    'success' => false,
-                    'message' => 'please select an image'
-                ], 500);    
-            }
-        //    var_dump($profilephoto);
-        //    return;
-        $image_extension = $profilephoto->getClientOriginalExtension();
-        if($image_extension==NULL){
-            return response()->json([
-                'required' => 'please upload an image'
-            ], 500);
-          }
-       
-            
-         if(SanitizeController::CheckFileExtensions($image_extension,array("png","jpg","jpeg","PNG","JPG","JPEG"))==FALSE){
+    
+          $staffs = auth("staffs")->authenticate($token);   
+          $generate_image_name = uniqid()."_".time().date("Ymd")."_IMG"; //change file name
+          // Extract base64 file for standard data
+          $fileBin = file_get_contents($request->profilephoto);
+          $mimeType = mime_content_type($request->profilephoto);
+          // Check allowed mime type
+          if ('image/png'==$mimeType) {
+          $profilephoto = file_put_contents("./user_images/$generate_image_name.png", $fileBin);
+          } else if('image/jpeg'==$mimeType)
+          {
+            $profilephoto = file_put_contents("./user_images/$generate_image_name.jpeg", $fileBin);
+          }else if('image/jpg'==$mimeType)
+          {
+            $profilephoto = file_put_contents("./user_images/$generate_image_name.jpg", $fileBin);
+          }else{
             return response()->json([
                 'success' => false,
-                'message' => 'Sorry, this is not an image please ensure your images are png or jpeg files'
-            ], 400);
+                'message' => "please be sure this is a jpeg,png or jpg"
+            ], 500);           
           }
 
-
-
-          $rename_image = uniqid()."_".time().date("Ymd")."_IMG.".$image_extension; //change file name
-         
           $staffs_prev_image = $staffs->profilephoto;
             if($staffs_prev_image==NULL){
 
@@ -301,15 +296,15 @@ $validator = Validator::make($request->only('profilephoto'),
 
             }
             else{
-                unlink(public_path('images/user_images/'.$staffs_prev_image));
+                unlink(public_path('user_images/'.$staffs_prev_image));
             }
           
 
-          $staffs->profilephoto = $rename_image;
+          $staffs->profilephoto = $generate_image_name.".jpeg";
           
           $staffs->save();
-            $staffs_dir = "images/user_images"; //directory for the image to be uploaded
-            $profilephoto->move($staffs_dir, $rename_image); //more like the move_uploaded_file in php except that more modifications
+        //     $staffs_dir = "images/user_images"; //directory for the image to be uploaded
+        //     $profilephoto->move($staffs_dir, $rename_image); //more like the move_uploaded_file in php except that more modifications
             
             
         return response()->json([
