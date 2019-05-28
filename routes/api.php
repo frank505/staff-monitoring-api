@@ -62,6 +62,7 @@ Route::group(['prefix' => 'admin',
 });
 
 
+
 Route::group(['prefix' => 'staffs',
 'namespace'=>'Staff',
 'middleware' => ['CORS']],function ()
@@ -73,6 +74,8 @@ Route::group(['prefix' => 'staffs',
     Route::post("/profilephoto/add/{token}","AuthStaffController@AddProfilePicture");
     Route::post("/logout","AuthStaffController@logout");
     Route::post("/change-password","AuthStaffController@resetPassword");
+    //auth login face image
+    Route::post("/upload-auth-image/{token}","AuthStaffController@UploadAuthImage");
     //display admin profile
     Route::post("/reset-password-link","AuthStaffController@sendResetPasswordLink");
     Route::get("/profile/{token}","AuthStaffController@getAuthStaff");
@@ -89,3 +92,4 @@ Route::group(['prefix' => 'staffs',
 });
 
 Route::post("/send/admin-push-notifications","SendPushNotificationsController@AdminGetUserLoginPush")->middleware("CorsPush");
+Route::get("/load-models","LoadModelsController@LoadModels")->middleware("CORS");

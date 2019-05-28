@@ -342,7 +342,8 @@ $delete = $this->financial_discipline::where(
 public function deductMoneyFromStaff(Request $request)
 {
     $loginpunishement = "attendance";
-    $validator = Validator::make($request->only('complaints','amount','date','month','year','day','id','name'), 
+    $validator = Validator::make($request->only('complaints','amount','date',
+    'month','year','day','id','name'), 
     ['complaints' => 'required|string',
     'amount'=>'required|integer',
     'date' => 'required|string',
@@ -438,7 +439,8 @@ if($validator->fails()){
   public function UpdateStaffSalaryDeduct(Request $request)
   {
     $loginpunishement = "attendance";
-    $validator = Validator::make($request->only('complaints','amount','date','month','year','day','id','name'), 
+    $validator = Validator::make($request->only('complaints','amount','date','month',
+    'year','day','id','name'), 
     ['complaints' => 'required|string',
     'amount'=>'required|integer',
     'date' => 'required|string',
@@ -508,7 +510,8 @@ if($validator->fails()){
   public function DeductSalaryByDefault(Request $request)
   {
     $loginpunishement = "attendance";
-    $validator = Validator::make($request->only('date','month','year','day','id','name','correct_date_time'), 
+    $validator = Validator::make($request->only('date','month','year','day','id','name',
+    'correct_date_time'), 
     [
     'date' => 'required|string',
     'month' => 'required|string',

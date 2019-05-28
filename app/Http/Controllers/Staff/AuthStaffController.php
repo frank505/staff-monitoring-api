@@ -15,7 +15,7 @@ use App\Http\Controllers\SanitizeController;
 use Carbon\Carbon;
 use App\StaffLoginNotificationsDetail;
 use App\Http\Controllers\SendPushNotificationsController;
-
+use App\AuthImage;
 
 class AuthStaffController extends Controller
 {
@@ -26,12 +26,14 @@ class AuthStaffController extends Controller
      public $loginAfterSignUp = true;
     protected $staff;
     protected $push;
+    protected $face_auth;
      public function __construct(UrlGenerator $url){
         $this->middleware("auth:staffs",['except'=>['login']]);
         $this->staff = new User();
         $this->base_url = $url->to("/");  //this is to make the baseurl available in this controller
         $this->staff_login_detail = new StaffLoginNotificationsDetail;
         $this->push = new SendPushNotificationsController($url);
+        $this->face_auth = new AuthImage;
     }
  
 
@@ -67,13 +69,6 @@ if($validator->fails()){
    }
     if($first_login==null)
     {
-       $staffIdToUse =  $this->staff->find($staff_id);
-       $staffIdToUse->first_login = 1;
-       $staffIdToUse->last_Login = Carbon::now(); 
-       $staffIdToUse->save();
-    $this->updateNotificationsTable($staff_id,$staff_name);
-   $this->push->AdminGetUserLoginPush(); //send push notification to admin that user just logged in
-    $this->NotificationSentIndicator();
        return response()->json([
         'success' => true,
         'token' => $jwt_token,
@@ -90,11 +85,15 @@ if($validator->fails()){
   $this->push->AdminGetUserLoginPush(); //send push notification to admin that user just logged in
  $this->NotificationSentIndicator();
 
+ //get staff face recog image
+  $getfaceTRecogTable = $this->face_auth->find($staff_id);
+   $faceRecogImage = $getfaceTRecogTable->image;
 return response()->json([
     'success' => true,
     'token' => $jwt_token,
     'first_login'=>false,
     'expires_in'=>auth("staffs")->factory()->getTTL(),
+    'authimage'=>"auth_images/".$faceRecogImage,
 ]);
    }
 
@@ -250,12 +249,12 @@ $user = auth("staffs")->authenticate($request->token);
 
 
 
-public function AddProfilePicture(Request $request,$token)
+public function AddProfilePicture(Request $request)
 {
 
 $validator = Validator::make($request->only('profilephoto'),
         [
-        'profilephoto' => 'required'
+        'profilephoto'=>'required'
                 ]
     );
 
@@ -266,7 +265,6 @@ $validator = Validator::make($request->only('profilephoto'),
         ],400);    
       }
 
-    
           $staffs = auth("staffs")->authenticate($token);   
           $generate_image_name = uniqid()."_".time().date("Ymd")."_IMG"; //change file name
           // Extract base64 file for standard data
@@ -287,19 +285,6 @@ $validator = Validator::make($request->only('profilephoto'),
                 'message' => "please be sure this is a jpeg,png or jpg"
             ], 500);           
           }
-
-          $staffs_prev_image = $staffs->profilephoto;
-            if($staffs_prev_image==NULL){
-
-            }else if($staffs_prev_image=="default-avatar.png")
-            {
-
-            }
-            else{
-                unlink(public_path('user_images/'.$staffs_prev_image));
-            }
-          
-
           $staffs->profilephoto = $generate_image_name.".jpeg";
           
           $staffs->save();
@@ -312,6 +297,65 @@ $validator = Validator::make($request->only('profilephoto'),
             'data' => "profile photo updated successfully"
         ], 200);
 
+    }
+
+    public function UploadAuthImage(Request $request,$token)
+    {
+        $validator = Validator::make($request->only('authimage'),
+        [
+        'authimage' => 'required'
+                ]
+    );
+
+    if($validator->fails()){
+        return response()->json([
+         "success"=>false,
+         "message"=>$validator->messages()->toArray(),
+        ],400);    
+      }
+
+          $staffs = auth("staffs")->authenticate($token);   
+          $generate_image_name = uniqid()."_".time().date("Ymd")."_IMG"; //change file name
+          // Extract base64 file for standard data
+          $fileBin = file_get_contents($request->authimage);
+          $mimeType = mime_content_type($request->authimage);
+          // Check allowed mime type
+          if ('image/png'==$mimeType) {
+          $authimage = file_put_contents("./auth_images/$generate_image_name.png", $fileBin);
+          } else if('image/jpeg'==$mimeType)
+          {
+            $authimage = file_put_contents("./auth_images/$generate_image_name.jpeg", $fileBin);
+          }else if('image/jpg'==$mimeType)
+          {
+            $authimage = file_put_contents("./auth_images/$generate_image_name.jpg", $fileBin);
+          }else{
+            return response()->json([
+                'success' => false,
+                'message' => "please be sure this is a jpeg,png or jpg"
+            ], 500);           
+          }
+          $staff_name = $staffs->name; 
+          $staff_id = $staffs->id;
+           
+          $this->face_auth->create([
+              "staff_name"=>$staff_name,
+              "staff_id"=>$staff_id,
+              "image"=>"$generate_image_name.jpeg"
+          ]);
+                 $staffIdToUse =  $this->staff->find($staff_id);
+       $staffIdToUse->first_login = 1;
+       $staffIdToUse->last_Login = Carbon::now(); 
+       $staffIdToUse->save();
+    $this->updateNotificationsTable($staff_id,$staff_name);
+   $this->push->AdminGetUserLoginPush(); //send push notification to admin that user just logged in
+    $this->NotificationSentIndicator();
+          //     $staffs_dir = "images/user_images"; //directory for the image to be uploaded
+        //     $profilephoto->move($staffs_dir, $rename_image); //more like the move_uploaded_file in php except that more modifications
+        return response()->json([
+            'success' => true,
+            'data' => "auth image uploaded successfully"
+        ], 200);
+        
     }
 
 }
