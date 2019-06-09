@@ -92,4 +92,4 @@ Route::group(['prefix' => 'staffs',
 });
 
 Route::post("/send/admin-push-notifications","SendPushNotificationsController@AdminGetUserLoginPush")->middleware("CorsPush");
-Route::get("/load-models","LoadModelsController@LoadModels")->middleware("CORS");
+//Route::get("/load-models","LoadModelsController@LoadModels")->middleware("CORS");

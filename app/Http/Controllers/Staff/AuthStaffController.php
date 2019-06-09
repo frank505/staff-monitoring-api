@@ -86,14 +86,18 @@ if($validator->fails()){
  $this->NotificationSentIndicator();
 
  //get staff face recog image
-  $getfaceTRecogTable = $this->face_auth->find($staff_id);
-   $faceRecogImage = $getfaceTRecogTable->image;
+  $getfaceTRecogTable = $this->face_auth->where(["staff_id"=>$staff_id])->get();
+  foreach ($getfaceTRecogTable as $key => $valueRecog) {
+      # code...
+      $faceRecogImage = $valueRecog->image;
+  }
+   
 return response()->json([
     'success' => true,
     'token' => $jwt_token,
     'first_login'=>false,
     'expires_in'=>auth("staffs")->factory()->getTTL(),
-    'authimage'=>"auth_images/".$faceRecogImage,
+    'authimage'=>"http://www.techbuildz.com/auth_images/".$faceRecogImage,
 ]);
    }
 
@@ -272,13 +276,13 @@ $validator = Validator::make($request->only('profilephoto'),
           $mimeType = mime_content_type($request->profilephoto);
           // Check allowed mime type
           if ('image/png'==$mimeType) {
-          $profilephoto = file_put_contents("./user_images/$generate_image_name.png", $fileBin);
+          $profilephoto = file_put_contents("http://www.techbuildz.com/user_images/$generate_image_name.png", $fileBin);
           } else if('image/jpeg'==$mimeType)
           {
-            $profilephoto = file_put_contents("./user_images/$generate_image_name.jpeg", $fileBin);
+            $profilephoto = file_put_contents("http://www.techbuildz.com/user_images/$generate_image_name.jpeg", $fileBin);
           }else if('image/jpg'==$mimeType)
           {
-            $profilephoto = file_put_contents("./user_images/$generate_image_name.jpg", $fileBin);
+            $profilephoto = file_put_contents("http://www.techbuildz.com/user_images/$generate_image_name.jpg", $fileBin);
           }else{
             return response()->json([
                 'success' => false,
