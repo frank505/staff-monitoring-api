@@ -11,11 +11,14 @@ use App\Http\Requests\RegisterAuthRequest;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Routing\UrlGenerator;
 use Validator;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\StaffPasswordReset;
 use App\Http\Controllers\SanitizeController;
 use Carbon\Carbon;
 use App\StaffLoginNotificationsDetail;
 use App\Http\Controllers\SendPushNotificationsController;
 use App\AuthImage;
+use DB;
 
 class AuthStaffController extends Controller
 {
@@ -28,7 +31,7 @@ class AuthStaffController extends Controller
     protected $push;
     protected $face_auth;
      public function __construct(UrlGenerator $url){
-        $this->middleware("auth:staffs",['except'=>['login']]);
+        $this->middleware("auth:staffs",['except'=>['login','sendResetPasswordLink']]);
         $this->staff = new User();
         $this->base_url = $url->to("/");  //this is to make the baseurl available in this controller
         $this->staff_login_detail = new StaffLoginNotificationsDetail;
@@ -86,6 +89,7 @@ if($validator->fails()){
  $this->NotificationSentIndicator();
 
  //get staff face recog image
+ $faceRecogImage = "";
   $getfaceTRecogTable = $this->face_auth->where(["staff_id"=>$staff_id])->get();
   foreach ($getfaceTRecogTable as $key => $valueRecog) {
       # code...
@@ -97,7 +101,7 @@ return response()->json([
     'token' => $jwt_token,
     'first_login'=>false,
     'expires_in'=>auth("staffs")->factory()->getTTL(),
-    'authimage'=>"http://www.techbuildz.com/auth_images/".$faceRecogImage,
+    'authimage'=>$this->base_url."/"."auth_images/".$faceRecogImage,
 ]);
    }
 
@@ -149,7 +153,7 @@ public function sendResetPasswordLink(Request $request)
          "message"=>"user with this email does not exist"
      ],400);
  }else{
-     $this->sendEmailData($request->email);
+     $this->sendEmail($request->email);
      return response()->json([
          "success"=>true,
          "message"=>"reset password link has been sent to your email please click on the link to reset your password",
@@ -161,15 +165,16 @@ public function sendResetPasswordLink(Request $request)
 
 public function sendEmail($email)
 {
-    $token = $this->createToken($user_email);
-    return Mail::to($user_email)->send(new StaffPasswordReset($token));  
+    $base_url = $this->base_url;
+    $token = $this->createToken($email);
+    return Mail::to($email)->send(new StaffPasswordReset($token,$base_url));  
 }
 
 
 public function createToken($email)
 {
     $token = str_random(60);
-      $this->saveToken($token,$user_email);
+      $this->saveToken($token,$email);
       return $token;
 }
 
@@ -276,13 +281,13 @@ $validator = Validator::make($request->only('profilephoto'),
           $mimeType = mime_content_type($request->profilephoto);
           // Check allowed mime type
           if ('image/png'==$mimeType) {
-          $profilephoto = file_put_contents("http://www.techbuildz.com/user_images/$generate_image_name.png", $fileBin);
+          $profilephoto = file_put_contents("./user_images/$generate_image_name.png", $fileBin);
           } else if('image/jpeg'==$mimeType)
           {
-            $profilephoto = file_put_contents("http://www.techbuildz.com/user_images/$generate_image_name.jpeg", $fileBin);
+            $profilephoto = file_put_contents("./user_images/$generate_image_name.jpeg", $fileBin);
           }else if('image/jpg'==$mimeType)
           {
-            $profilephoto = file_put_contents("http://www.techbuildz.com/user_images/$generate_image_name.jpg", $fileBin);
+            $profilephoto = file_put_contents("./user_images/$generate_image_name.jpg", $fileBin);
           }else{
             return response()->json([
                 'success' => false,

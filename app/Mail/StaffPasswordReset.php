@@ -16,9 +16,13 @@ class StaffPasswordReset extends Mailable
      *
      * @return void
      */
-    public function __construct()
+    public $token;
+    public $base_url;
+    public function __construct($token,$base_url)
     {
         //
+        $this->token = $token;
+        $this->base_url = $base_url;
     }
 
     /**
@@ -28,6 +32,6 @@ class StaffPasswordReset extends Mailable
      */
     public function build()
     {
-        return $this->markdown('Email/StaffPasswordReset');
+        return $this->markdown('Email/StaffPasswordReset')->with(["token"=>$this->token,"base_url"=>$this->base_url]);
     }
 }

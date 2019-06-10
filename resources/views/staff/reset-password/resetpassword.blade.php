@@ -1,4 +1,4 @@
-@extends('users.layout.app')
+@extends('staff.layout.app')
 
 @section('content')
 <div class="container">
@@ -35,6 +35,12 @@
                                     </div>
                                 @endif
 
+                                @if (session("error_password_and_token_dont_match"))
+                                <div class="alert alert-danger">
+                                    <strong>{{ session("error_password_and_token_dont_match")}}</strong>
+                                </span>
+                                </div>
+                            @endif
 
                                 
                     
@@ -63,6 +69,9 @@
                                 <input id="password-confirm" type="password" class="form-control" name="password_confirmation" required>
                             </div>
                         </div>
+
+                       <input type="hidden"  value="{{ app('request')->input('token') }}"  name="hidden_token">
+
 
                         <div class="form-group row mb-0">
                             <div class="col-md-6 offset-md-4">
